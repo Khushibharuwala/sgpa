@@ -1,2 +1,171 @@
-# sgpa
-..
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGPA Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .subject {
+            display: flex;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .subject input {
+            flex: 1;
+            margin-right: 10px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .subject input:last-child {
+            margin-right: 10px;
+        }
+        .deleteBtn {
+            padding: 8px 12px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .deleteBtn:hover {
+            background-color: #da190b;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #addSubject {
+            background-color: #2196F3;
+        }
+        #addSubject:hover {
+            background-color: #0b7dda;
+        }
+        #result {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CGPA Calculator</h1>
+        <div id="subjects">
+            <!-- Initial subject inputs -->
+            <div class="subject">
+                <input type="number" class="marks" placeholder="Marks (e.g., 85)" step="0.01" min="0" max="100" required>
+                <input type="number" class="credits" placeholder="Credits (e.g., 4 or 0.5)" step="0.1" min="0.1" required>
+                <button class="deleteBtn">Delete</button>
+            </div>
+        </div>
+        <button id="addSubject">Add Another Subject</button>
+        <button id="calculate">Calculate CGPA</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const subjectsContainer = document.getElementById('subjects');
+        const addSubjectBtn = document.getElementById('addSubject');
+        const calculateBtn = document.getElementById('calculate');
+        const resultDiv = document.getElementById('result');
+
+        // Function to add a new subject input row
+        addSubjectBtn.addEventListener('click', () => {
+            const subjectDiv = document.createElement('div');
+            subjectDiv.classList.add('subject');
+            subjectDiv.innerHTML = `
+                <input type="number" class="marks" placeholder="Marks (e.g., 85)" step="0.01" min="0" max="100" required>
+                <input type="number" class="credits" placeholder="Credits (e.g., 4 or 0.5)" step="0.1" min="0.1" required>
+                <button class="deleteBtn">Delete</button>
+            `;
+            subjectsContainer.appendChild(subjectDiv);
+            attachDeleteListeners(); // Re-attach listeners after adding
+        });
+
+        // Function to attach delete listeners to all delete buttons
+        function attachDeleteListeners() {
+            const deleteBtns = document.querySelectorAll('.deleteBtn');
+            deleteBtns.forEach(btn => {
+                btn.removeEventListener('click', deleteSubject); // Prevent multiple listeners
+                btn.addEventListener('click', deleteSubject);
+            });
+        }
+
+        // Function to delete a subject row
+        function deleteSubject(event) {
+            const subjectDiv = event.target.closest('.subject');
+            if (subjectsContainer.children.length > 1) {
+                subjectDiv.remove();
+            } else {
+                alert('You must have at least one subject.');
+            }
+        }
+
+        // Initial attachment of delete listeners
+        attachDeleteListeners();
+
+        // Function to calculate CGPA
+        calculateBtn.addEventListener('click', () => {
+            const marksInputs = document.querySelectorAll('.marks');
+            const creditsInputs = document.querySelectorAll('.credits');
+
+            let totalPoints = 0;
+            let totalCredits = 0;
+
+            let valid = true;
+
+            marksInputs.forEach((marksInput, index) => {
+                const marks = parseFloat(marksInput.value);
+                const credits = parseFloat(creditsInputs[index].value);
+
+                if (isNaN(marks) || isNaN(credits) || marks < 0 || credits < 0.1) {
+                    valid = false;
+                    return;
+                }
+
+                const gradePoint = Math.ceil(marks / 10);
+                totalPoints += gradePoint * credits;
+                totalCredits += credits;
+            });
+
+            if (!valid || totalCredits === 0) {
+                resultDiv.innerHTML = 'Please enter valid marks and credits for all subjects.';
+                return;
+            }
+
+            const cgpa = totalPoints / totalCredits;
+            resultDiv.innerHTML = `Your CGPA is: ${cgpa.toFixed(2)}`;
+        });
+    </script>
+</body>
+</html>
